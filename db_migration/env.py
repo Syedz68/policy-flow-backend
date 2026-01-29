@@ -4,6 +4,15 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from pathlib import Path
+import sys
+
+# Add the parent directory to sys.path to import app modules
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from app.core.config import settings
+from app.db.session import Base
+from app.db.base import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,7 +27,11 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+
+# Set the SQLAlchemy URL from your settings
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -44,6 +57,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,  # Detect column type changes
+        compare_server_default=True,  # Detect default value changes
     )
 
     with context.begin_transaction():
@@ -57,15 +72,22 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # Override the sqlalchemy.url with our settings
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = settings.DATABASE_URL
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata,
+            compare_type=True,  # Detect column type changes
+            compare_server_default=True,  # Detect default value changes
+            include_schemas=False,  # Set to True if using multiple schemas
         )
 
         with context.begin_transaction():
