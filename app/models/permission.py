@@ -6,10 +6,10 @@ class Permission(Base):
     __tablename__ = "permissions"
 
     id = Column(Integer, primary_key=True, index=True)
-    permission_code = Column(String, nullable=True)
+    permission_code = Column(String, unique=True, nullable=False)
     description = Column(String, nullable=True)
 
-    role_permit = relationship("RolePermission", back_populates="permission", cascade="all, delete-orphan")
+    role_permissions = relationship("RolePermission", back_populates="permission", cascade="all, delete-orphan")
 
 
 class RolePermission(Base):
@@ -19,5 +19,5 @@ class RolePermission(Base):
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     permission_id = Column(Integer, ForeignKey("permissions.id"), nullable=False)
 
-    role = relationship("Role", back_populates="permission")
-    permission = relationship("Permission", back_populates="role_permit")
+    role = relationship("Role", back_populates="role_permissions")
+    permission = relationship("Permission", back_populates="role_permissions")
