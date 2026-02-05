@@ -19,6 +19,9 @@ class User(Base):
     roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
     tokens = relationship("Token", back_populates="user", cascade="all, delete-orphan")
     dept = relationship("Department", back_populates="user")
+    form = relationship("Form", back_populates="user")
+    submission = relationship("Submission", back_populates="user", cascade="all, delete-orphan")
+    approval_log = relationship("ApprovalLog", back_populates="user", cascade="all, delete-orphan")
 
 
 class Token(Base):

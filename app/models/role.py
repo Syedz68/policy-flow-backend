@@ -13,6 +13,8 @@ class Role(Base):
 
     user_roles = relationship("UserRole", back_populates="role", cascade="all, delete-orphan")
     role_permissions = relationship("RolePermission", back_populates="role", cascade="all, delete-orphan")
+    step = relationship("WorkflowStep", back_populates="role")
+    approval = relationship("ApprovalTask", back_populates="role")
 
 
 class UserRole(Base):
